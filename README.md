@@ -41,14 +41,7 @@ For now, `hardhat.config.js` uses the following:
 
 You can perform tests with `$ npx hardhat test` to run all tests from the `test/` directory.
 
-### Utilities
-
-`$ npm run dev:size-contracts` to output compiled contract sizes.<br>
-`$ npm run dev:abi` to generate abi to the directory `abi/`.
-`$ npm run docgen` to generate a documentation for smart-contracts. The documentation is generated for all smart-contracts (from the directory `contracts/`) to the directory `docs/` using the [NatSpec format](https://docs.soliditylang.org/en/v0.8.7/natspec-format.html). There is a template and helpers in the directory `docgen/`. This uses the documentation generator libraries by OpenZeppelin ([solidity-docgen](https://github.com/OpenZeppelin/solidity-docgen)).<br>
-`$ npm run flatten` to flatten the smart-contracts before building. Use this if you need to verify contracts on your own. By default, all deployment scripts will verify code automatically (you will need to set the API keys and URLs for contract verification services, see [Configuration](#Configuration) section).
-
-## _Production_
+## _Deployment_
 
 ### Build
 

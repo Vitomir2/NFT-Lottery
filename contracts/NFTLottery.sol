@@ -62,6 +62,7 @@ contract NFTLottery is ERC721Upgradeable, AccessControlUpgradeable {
     function initialize(string memory _name, string memory _symbol) external initializer {
         __ERC721_init(_name, _symbol);
         __AccessControl_init();
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         ticketPrice = 0.1 ether;
     }
 

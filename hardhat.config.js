@@ -51,5 +51,8 @@ module.exports = {
       // Polygon
       polygonMumbai: POLYGONSCAN_API_KEY
     }
+  },
+  mocha: {
+    timeout: 100000000000000
   }
 };

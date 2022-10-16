@@ -1,4 +1,4 @@
-# NFT Lottery contract smart-contracts
+# NFT Lottery contract
 
 NFT Lottery assignment. ***For test and development purposes only
 

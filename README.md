@@ -1,6 +1,6 @@
 # NFT Lottery contract
 
-NFT Lottery assignment. ***For test and development purposes only
+NFT Lottery assignment. **For test and development purposes only**
 
 ## Prerequisites
 

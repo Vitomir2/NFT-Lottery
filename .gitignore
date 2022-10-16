@@ -1,0 +1,17 @@
+node_modules
+.env
+coverage
+coverage.json
+typechain
+typechain-types
+
+#Hardhat files
+cache
+artifacts
+
+#VS Code
+.vscode
+.VSCodeCounter
+
+#Track of all the implementation contracts of the `@openzeppelin/hardhat-upgrades` plugin
+.openzeppelin

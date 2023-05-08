@@ -36,12 +36,12 @@ module.exports = {
     // Ethereum
     goerli: {
       url: ETH_TESTNET_URL,
-      accounts: DEPLOYER_PRIVATE_KEY ? DEPLOYER_PRIVATE_KEY : []
+      accounts: DEPLOYER_PRIVATE_KEY ? [ DEPLOYER_PRIVATE_KEY ] : []
     },
     // Polygon
     mumbai: {
       url: POLYGON_TESTNET_URL,
-      accounts: DEPLOYER_PRIVATE_KEY ? DEPLOYER_PRIVATE_KEY : []
+      accounts: DEPLOYER_PRIVATE_KEY ? [ DEPLOYER_PRIVATE_KEY ] : []
     }
   },
   etherscan: {

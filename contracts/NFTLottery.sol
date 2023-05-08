@@ -27,8 +27,11 @@ contract NFTLottery is ERC721Upgradeable, AccessControlUpgradeable {
     /// @notice The price for each ticket
     uint256 public ticketPrice;
 
-    /// @notice List of participants by lottery
-    address[] public participants;
+    /// @notice Map of every participant by its address and the number of entries
+    address[] private participantAddresses;
+
+    /// @notice Map of every participant by its address and the number of entries
+    mapping (address => uint) private participants;
 
     /// @notice The surprise winner that will be chosen randomly during the lottery
     address public surpriseWinner;
@@ -78,7 +81,11 @@ contract NFTLottery is ERC721Upgradeable, AccessControlUpgradeable {
         _safeMint(msg.sender, newTicketId);
         _tokenIds.increment();
 
-        participants.push(msg.sender);
+        participants[msg.sender]++;
+        //* Add the participant address in order to be able to clear entries when start lottery
+        if (participants[msg.sender] == 1) {
+            participantAddresses.push(msg.sender);
+        }
 
         emit UserEnteredLottery(newTicketId, msg.sender, msg.value);
     }
@@ -106,7 +113,9 @@ contract NFTLottery is ERC721Upgradeable, AccessControlUpgradeable {
         startAt = _startAt;
         endAt = _endAt;
         
-        delete participants;
+        //! better to delete and clear state vars when endLottery
+        //* call the clearParticipants method
+        delete participantAddresses;
         surpriseWinner = address(0);
         lotteryWinner = address(0);
 
@@ -125,10 +134,12 @@ contract NFTLottery is ERC721Upgradeable, AccessControlUpgradeable {
         uint256 winnerIndex = 0;
         while (lotteryWinner == surpriseWinner) {
             winnerIndex = random();
-            lotteryWinner = participants[winnerIndex];
+            // lotteryWinner = participants[winnerIndex];
+            lotteryWinner = participantAddresses[winnerIndex];
         }
 
-        lotteryWinner = participants[winnerIndex];
+        // lotteryWinner = participants[winnerIndex];
+        lotteryWinner = participantAddresses[winnerIndex];
         payable(lotteryWinner).transfer(address(this).balance);
 
         emit LotteryEnded(lotteryWinner);
@@ -139,11 +150,13 @@ contract NFTLottery is ERC721Upgradeable, AccessControlUpgradeable {
      * @dev This functions takes a random surprise winner from the participants and award it with 50% of the prize pool
      */
     function awardSurpriseWinner() public startedLottery {
-        require(participants.length != 0, "NFTLottery: no participants in the lottery");
+        // require(participants.length != 0, "NFTLottery: no participants in the lottery");
+        require(participantAddresses.length != 0, "NFTLottery: no participants in the lottery");
         require(surpriseWinner == address(0), "NFTLottery: cannot reward twice during the lottery");
 
         uint256 winnerIndex = random();
-        surpriseWinner = participants[winnerIndex];
+        // surpriseWinner = participants[winnerIndex];
+        surpriseWinner = participantAddresses[winnerIndex];
         payable(surpriseWinner).transfer(address(this).balance / 2);
 
         emit SurpriseWinnerAwarded(surpriseWinner);
@@ -156,8 +169,18 @@ contract NFTLottery is ERC721Upgradeable, AccessControlUpgradeable {
      * @return uint256 index of the chosen winner
      */
     function random() private view returns(uint256) {
-        uint256 rand = uint256(keccak256(abi.encodePacked(block.difficulty, block.timestamp, participants)));
-        return rand % participants.length;
+        // uint256 rand = uint256(keccak256(abi.encodePacked(block.difficulty, block.timestamp, participants)));
+        // return rand % participants.length;
+        uint256 rand = uint256(keccak256(abi.encodePacked(block.difficulty, block.timestamp, participantAddresses)));
+        return rand % participantAddresses.length;
+    }
+
+    /**
+     * @notice Clear the participants mapping
+     * @dev Get the array for participantAddresses, loop through it and clear the mapping for each address.
+     */
+    function clearParticipants() private {
+        // vito
     }
 
     //--- Getters ---

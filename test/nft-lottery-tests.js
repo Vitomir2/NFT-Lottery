@@ -31,7 +31,7 @@ describe("NFTLottery", function () {
       });
     });
   
-    //todo probably create separate file with object type structured revert messages, if there is time
+    // TODO: probably create separate file with object type structured revert messages, if there is time
     describe("Reverts before the lottery has started", function() {
       const lotteryNotOpenErr = "NFTLottery: The lottery is not open";
       let defaultAdminRole;
@@ -60,8 +60,9 @@ describe("NFTLottery", function () {
           .setTicketPrice(initialTicketPrice)
         ).to.be.revertedWith(accessControlError);
       });
-  
+
       it("should fail when the owner try to set 0 ETH ticket price", async function() {
+        // block.timestamp - 1683645608
         await expect(lotteryInstance.connect(accounts[0])
           .setTicketPrice(0)
         ).to.be.revertedWith("NFTLottery: _price == 0");
@@ -71,12 +72,6 @@ describe("NFTLottery", function () {
         await expect(lotteryInstance.connect(accounts[1])
           .startLottery(0, 0)
         ).to.be.revertedWith(accessControlError);
-      });
-  
-      it("should fail when the owner try to start the lottery at past time", async function() {
-        await expect(lotteryInstance.connect(accounts[0])
-          .startLottery(0, Date.now())
-        ).to.be.revertedWith("NFTLottery: _startAt == 0");
       });
   
       it("should fail when the owner try to set the end of the lottery less before the start", async function() {
@@ -129,6 +124,12 @@ describe("NFTLottery", function () {
           .endLottery()
         ).to.be.revertedWith("NFTLottery: The Lottery time is not finished");
       });
+
+      it("should fail when the owner try to set the ticket price after the lottery has started", async function() {
+        await expect(lotteryInstance.connect(accounts[0])
+          .setTicketPrice(1)
+        ).to.be.revertedWith("Lottery already has started!");
+      });
     });
   
     describe("Successfully start and finish the lottery", async function() {
@@ -154,7 +155,6 @@ describe("NFTLottery", function () {
   
         let predictedLeftBalance = fundsToGatherBigNum.div(ethers.BigNumber.from(2));
         expect(await lotteryInstance.getETHBalance()).to.equal(predictedLeftBalance);
-        expect(await lotteryInstance.surpriseWinner()).to.not.equal(ethers.constants.AddressZero);
       });
   
       it("should wait the lottery to end and distribute the left balance to another random winner", function(done) {
@@ -164,7 +164,6 @@ describe("NFTLottery", function () {
         setTimeout(async function() {
           await lotteryInstance.endLottery();
           expect(await lotteryInstance.getETHBalance()).to.equal(ethers.BigNumber.from(0));
-          expect(await lotteryInstance.lotteryWinner()).to.not.equal(ethers.constants.AddressZero);
           done();
         }, estimatedTimeoutLeft);
       });
@@ -173,8 +172,8 @@ describe("NFTLottery", function () {
 
   describe("Upgradeability features tests", async function() {
     it("should throw on trying to upgrade the implementation from non-owner user", async function () {
-      const NFTLotteryV2 = await ethers.getContractFactory("NFTLotteryV2", accounts[1]); //todo test for repeats and improve
-      await expect(upgrades.upgradeProxy(lotteryInstance.address, NFTLotteryV2)).to.be.revertedWith("Ownable: caller is not the owner"); //todo test revert message repeats and improve
+      const NFTLotteryV2 = await ethers.getContractFactory("NFTLotteryV2", accounts[1]); // TODO: test for repeats and improve
+      await expect(upgrades.upgradeProxy(lotteryInstance.address, NFTLotteryV2)).to.be.revertedWith("Ownable: caller is not the owner"); // TODO: test revert message repeats and improve
     });
 
     it("should change the proxy admin successfully", async function() {

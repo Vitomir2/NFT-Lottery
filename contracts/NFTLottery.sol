@@ -31,10 +31,10 @@ contract NFTLottery is ERC721Upgradeable, AccessControlUpgradeable {
     address[] public participants;
 
     /// @notice The surprise winner that will be chosen randomly during the lottery
-    address public surpriseWinner;
+    address private surpriseWinner;
 
     /// @notice The final lottery winner that will be chosen randomly during the lottery
-    address public lotteryWinner;
+    address private lotteryWinner;
 
     //--- Events ---
     event UserEnteredLottery(uint256 _tokenId, address _user, uint256 _price);
@@ -84,10 +84,11 @@ contract NFTLottery is ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     /**
-     * @notice Sets the price for one lottery ticket
+     * @notice Sets the price for one lottery ticket. Setting the price outside the startLottery gives opportunity to the admin to set it before starting the lottery
      * @param _price Price for the ticket
      */
     function setTicketPrice(uint256 _price) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(startAt == 0 || block.timestamp < startAt, "Lottery already has started!");
         require(_price > 0, "NFTLottery: _price == 0");
         ticketPrice = _price;
         emit TicketPriceIsSet(_price);
@@ -105,24 +106,20 @@ contract NFTLottery is ERC721Upgradeable, AccessControlUpgradeable {
 
         startAt = _startAt;
         endAt = _endAt;
-        
-        delete participants;
-        surpriseWinner = address(0);
-        lotteryWinner = address(0);
 
-        emit LotteryStarted(_startAt, _endAt);
+        emit LotteryStarted(startAt, endAt);
     }
 
     /**
      * @notice Ends the Lottery
      * @dev This functions is used to end the NFT lottery if the end time is passed
      */
-    function endLottery() public {
+    function endLottery() public onlyRole(DEFAULT_ADMIN_ROLE) {
         require(block.timestamp > endAt, "NFTLottery: The Lottery time is not finished");
         
         //! Not a good practice to make loops in the contract, but that was the easier way to choose different winner
         //! another option was to delete all records for the winner from the participants array
-        uint256 winnerIndex = 0;
+        uint256 winnerIndex;
         while (lotteryWinner == surpriseWinner) {
             winnerIndex = random();
             lotteryWinner = participants[winnerIndex];
@@ -132,6 +129,11 @@ contract NFTLottery is ERC721Upgradeable, AccessControlUpgradeable {
         payable(lotteryWinner).transfer(address(this).balance);
 
         emit LotteryEnded(lotteryWinner);
+
+        //* Clear the variables at the end instead of the startLottery
+        delete participants;
+        surpriseWinner = address(0);
+        lotteryWinner = address(0);
     }
 
     /**
